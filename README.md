@@ -1,6 +1,6 @@
 ## Nodejs TypeScript Docker Template
 ----
 
-  - Docker for Ubuntu https://docs.docker.com/install/linux/docker-ce/ubuntu/
+  - A helpful resource: https://www.digitalocean.com/community/tutorials/how-to-build-a-node-js-application-with-docker
 
-  - 
+  - npm i && npm run start
