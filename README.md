@@ -1,6 +1,10 @@
-## Nodejs TypeScript Docker Template
-----
+A simple Hello World app written in Node.js (Express).
 
-  - A helpful resource: https://www.digitalocean.com/community/tutorials/how-to-build-a-node-js-application-with-docker
+Contains Dockerfiles for Development (with Hot Reloading) and Production.
 
-  - npm i && npm run start
+Build and run using any dockerfile:
+
+```
+$ docker build -f [dockerfile] -t node-docker .
+$ docker run --rm -it -p 8080:8080 node-docker
+```

@@ -1,16 +1,13 @@
 import * as express from "express";
 
-type IReq = express.Request;
-type IRes = express.Response;
-
-// Constants 
+// Constants
 const PORT = 8080;
 const HOST = '0.0.0.0';
 
 // App
 const app = express();
-app.get('/', (req: IReq, res: IRes) => {
-  res.send('Hello world\n');
+app.get('/', (req, res) => {
+  res.send('Hello World for Docker!\n');
 });
 
 app.listen(PORT, HOST);

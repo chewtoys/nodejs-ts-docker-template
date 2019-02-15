@@ -1,0 +1,46 @@
+version: "3.7"
+
+services:
+  # reverse-proxy:
+  #   image: traefik # The official Traefik docker image
+  #   command: --api --docker # Enables the web UI and tells Traefik to listen to docker
+  #   ports:
+  #     - "80:80"     # The HTTP port
+  #     - "8080:8080" # The Web UI (enabled by --api)
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: app
+    ports:
+      - "5432:5432"
+    volumes: 
+      - ./pgdata:/var/lib/postgresql/data
+
+  node:
+    build: 
+      dockerfile: dev.Dockerfile
+      context: .
+    ports: 
+      - 4000:8080
+    labels:
+      traefik.docker.network: traefik
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+
+  db-manager:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: moorejared97@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_LISTEN_PORT: 5555
+    ports: 
+      - 5555:5555
+    depends_on:
+      - db
