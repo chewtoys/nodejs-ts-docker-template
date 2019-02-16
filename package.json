@@ -4,6 +4,7 @@
   "description": "Dockerfiles for Node.js Web Apps",
   "main": "server.js",
   "scripts": {
+    "dev": "ts-node-dev server/server.ts",
     "start": "node server.js"
   },
   "dependencies": {

@@ -15,13 +15,14 @@ services:
       dockerfile: postgres.Dockerfile
       context: .
     # restart: always
+    # image: postgres
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: app
     ports:
       - "5432:5432"
     volumes: 
-      - ./pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
 
   node:
     build: 
@@ -35,6 +36,13 @@ services:
       - .:/app
     depends_on:
       - db
+  
+  ubuntu:
+    image: ubuntu
+    volumes:
+      - ./pgdata:/pgdataSync
+      - pgdata:/pgdata
+    command: cp -a /pgdata/. /pgdataSync
 
   db-manager:
     image: dpage/pgadmin4
@@ -46,3 +54,7 @@ services:
       - 5555:5555
     depends_on:
       - db
+
+volumes:
+  pgdata:
+    external: true
