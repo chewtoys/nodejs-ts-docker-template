@@ -1,63 +1,67 @@
 version: "3.7"
 
 services:
-  # reverse-proxy:
-  #   image: traefik # The official Traefik docker image
-  #   command: --api --docker # Enables the web UI and tells Traefik to listen to docker
-  #   ports:
-  #     - "80:80"     # The HTTP port
-  #     - "8080:8080" # The Web UI (enabled by --api)
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
-
-  db:
-    build: 
-      dockerfile: postgres.Dockerfile
-      context: .
-    # restart: always
-    environment:
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: app
+  reverse-proxy:
+    image: traefik # The official Traefik docker image
+    command: --api --docker # Enables the web UI and tells Traefik to listen to docker
     ports:
-      - "5432:5432"
-    volumes: 
-      - pgdata:/var/lib/postgresql/data
+      - "80:80"     # The HTTP port
+      - "8080:8080" # The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
 
   node:
     build: 
-      dockerfile: dev.Dockerfile
+      dockerfile: ./docker/node.dev.Dockerfile
       context: .
-    ports: 
-      - 4000:8080
     labels:
-      traefik.docker.network: traefik
+      - traefik.docker.network=traefik
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:localhost
     volumes:
       - .:/app
     depends_on:
       - db
-  
-  ubuntu:
-    build: 
-      dockerfile: ubuntu.Dockerfile
-      context: .
-    volumes:
-      - ./pgdata:/pgdataSync
-      - pgdata:/pgdata
-    command: rsync -avz /pgdata/. /pgdataSync
 
-  db-manager:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: app
+    labels:
+      - traefik.enable=false
+    volumes: 
+      - pgdata:/var/lib/postgresql/data
+    depends_on:
+      - pgdata-sync
+
+  pgadmin:
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: moorejared97@gmail.com
       PGADMIN_DEFAULT_PASSWORD: password
-      PGADMIN_LISTEN_PORT: 5555
+      PGADMIN_LISTEN_PORT: 80
+    labels:
+      - traefik.docker.network=traefik
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:pgadmin.localhost
     volumes:
-      - ./pga4volume:/var/lib/pgadmin
-    ports: 
-      - 5555:5555
+      - ./docker/pga4volume:/var/lib/pgadmin
     depends_on:
       - db
+  
+  pgdata-sync:
+    build: 
+      dockerfile: pgdata-sync.Dockerfile
+      context: ./docker
+    labels:
+      - traefik.enable=false
+    volumes:
+      - ./pgdata:/pgdataSync
+      - pgdata:/pgdata
+    command: >
+     bash -c "rsync -avz /pgdataSync/. /pgdata && while true; do rsync -avz /pgdata/. /pgdataSync; sleep 60; done"
 
 volumes:
   pgdata:
-    external: true
