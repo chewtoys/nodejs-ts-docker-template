@@ -15,7 +15,6 @@ services:
       dockerfile: postgres.Dockerfile
       context: .
     # restart: always
-    # image: postgres
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: app
@@ -38,11 +37,13 @@ services:
       - db
   
   ubuntu:
-    image: ubuntu
+    build: 
+      dockerfile: ubuntu.Dockerfile
+      context: .
     volumes:
       - ./pgdata:/pgdataSync
       - pgdata:/pgdata
-    command: cp -a /pgdata/. /pgdataSync
+    command: rsync -avz /pgdata/. /pgdataSync
 
   db-manager:
     image: dpage/pgadmin4
@@ -50,6 +51,8 @@ services:
       PGADMIN_DEFAULT_EMAIL: moorejared97@gmail.com
       PGADMIN_DEFAULT_PASSWORD: password
       PGADMIN_LISTEN_PORT: 5555
+    volumes:
+      - ./pga4volume:/var/lib/pgadmin
     ports: 
       - 5555:5555
     depends_on:
