@@ -18,4 +18,3 @@ RUN npm install
 USER node
 
 EXPOSE 8080
-CMD [ "ts-node-dev", "server/server.ts" ]

@@ -1,0 +1,12 @@
+{
+  "name": "default",
+  "type": "postgres",
+  "host": "db",
+  "port": 5432,
+  "username": "postgres",
+  "password": "password",
+  "database": "app",
+  "synchronize": true,
+  "logging": true,
+  "entities": ["server/GraphQL/entity/*.*"]
+}

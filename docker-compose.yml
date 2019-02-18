@@ -1,7 +1,7 @@
 version: "3.7"
 
 services:
-  reverse-proxy:
+  proxy:
     image: traefik # The official Traefik docker image
     command: --api --docker # Enables the web UI and tells Traefik to listen to docker
     ports:
@@ -10,7 +10,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
 
-  node:
+  node-express:
     build: 
       dockerfile: ./docker/node.dev.Dockerfile
       context: .
@@ -20,6 +20,21 @@ services:
       - traefik.frontend.rule=Host:localhost
     volumes:
       - .:/app
+    command: ts-node-dev --project server/tsconfig.json server/Express/index.ts
+    depends_on:
+      - db
+
+  node-graphql:
+    build: 
+      dockerfile: ./docker/node.dev.Dockerfile
+      context: .
+    labels:
+      - traefik.docker.network=traefik
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:api.localhost
+    volumes:
+      - .:/app
+    command: ts-node-dev --project server/tsconfig.json server/GraphQL/index.ts
     depends_on:
       - db
 
@@ -33,14 +48,14 @@ services:
       - traefik.enable=false
     volumes: 
       - pgdata:/var/lib/postgresql/data
-    depends_on:
+    depends_on: 
       - pgdata-sync
 
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: moorejared97@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_DEFAULT_EMAIL: test@test.test
+      PGADMIN_DEFAULT_PASSWORD: test
       PGADMIN_LISTEN_PORT: 80
     labels:
       - traefik.docker.network=traefik
@@ -53,15 +68,15 @@ services:
   
   pgdata-sync:
     build: 
-      dockerfile: pgdata-sync.Dockerfile
-      context: ./docker
+      dockerfile: ./docker/pgdata-sync.Dockerfile
+      context: .
     labels:
       - traefik.enable=false
     volumes:
-      - ./pgdata:/pgdataSync
+      - ./docker/pgdata:/pgdataSync
       - pgdata:/pgdata
-    command: >
-     bash -c "rsync -avz /pgdataSync/. /pgdata && while true; do rsync -avz /pgdata/. /pgdataSync; sleep 60; done"
+    # command: bash -c "rsync -avz /pgdataSync/. /pgdata && while true; do rsync -avz /pgdata/. /pgdataSync; sleep 600; done"
+    command: bash -c "rsync -avz /pgdataSync/. /pgdata && rsync -avz /pgdata/. /pgdataSync"
 
 volumes:
   pgdata:
