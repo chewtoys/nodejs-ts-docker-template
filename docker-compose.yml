@@ -66,17 +66,17 @@ services:
     depends_on:
       - db
   
-  pgdata-sync:
-    build: 
-      dockerfile: ./docker/pgdata-sync.Dockerfile
-      context: .
-    labels:
-      - traefik.enable=false
-    volumes:
-      - ./docker/pgdata:/pgdataSync
-      - pgdata:/pgdata
-    # command: bash -c "rsync -avz /pgdataSync/. /pgdata && while true; do rsync -avz /pgdata/. /pgdataSync; sleep 600; done"
-    command: bash -c "rsync -avz /pgdataSync/. /pgdata && rsync -avz /pgdata/. /pgdataSync"
+  # pgdata-sync:
+  #   build: 
+  #     dockerfile: ./docker/pgdata-sync.Dockerfile
+  #     context: .
+  #   labels:
+  #     - traefik.enable=false
+  #   volumes:
+  #     - ./docker/pgdata:/pgdataSync
+  #     - pgdata:/pgdata
+  #   # command: bash -c "rsync -avz /pgdataSync/. /pgdata && while true; do rsync -avz /pgdata/. /pgdataSync; sleep 600; done"
+  #   command: bash -c "rsync -avz /pgdataSync/. /pgdata && rsync -avz /pgdata/. /pgdataSync"
 
 volumes:
   pgdata:
